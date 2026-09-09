@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ryu AI</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%25" stop-color="%23615CED"/><stop offset="100%25" stop-color="%234F46E5"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(%23g)"/><text x="50" y="68" font-size="52" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">R</text><circle cx="76" cy="24" r="5" fill="%23A78BFA"/></svg>'>
+<meta name="theme-color" content="#615CED">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+:root{--p:#615CED;--b:#4F46E5;--l:#A78BFA}
+body.dark{--bg1:#0f0c29;--bg2:#302b63;--bg3:#24243e;--text:#fff;--sub:#9ca3af;--glass:rgba(255,255,255,.06);--border:rgba(255,255,255,.1);--ibg:rgba(255,255,255,.08);--bar:rgba(0,0,0,.25)}
+body.light{--bg1:#eef2ff;--bg2:#e0e7ff;--bg3:#f5f3ff;--text:#1e1b4b;--sub:#6b7280;--glass:rgba(255,255,255,.7);--border:rgba(97,92,237,.15);--ibg:rgba(255,255,255,.9);--bar:rgba(255,255,255,.5)}
+body{background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;color:var(--text);transition:background .4s}
+.header{padding:14px 18px;display:flex;align-items:center;gap:12px;background:var(--glass);border-bottom:1px solid var(--border)}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--b));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:1.3em;box-shadow:0 4px 15px rgba(97,92,237,.4);flex-shrink:0}
+.htext{flex:1;min-width:0}
+.htext h1{font-size:1.1em;background:linear-gradient(90deg,var(--l),#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.htext p{font-size:.7em;color:var(--sub)}
+.st{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px;animation:pu 2s infinite}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
+.hb{background:var(--glass);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:11px;font-size:1em;cursor:pointer;flex-shrink:0}
+#messages{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:85%;padding:12px 16px;border-radius:18px;font-size:.92em;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;animation:pop .3s ease}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.user{align-self:flex-end;background:linear-gradient(135deg,var(--p),var(--b));color:#fff;border-bottom-right-radius:5px}
+.ai{align-self:flex-start;background:var(--glass);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:5px}
+.spk{display:inline-block;margin-top:8px;background:none;border:1px solid var(--border);color:var(--sub);border-radius:8px;padding:3px 10px;font-size:.75em;cursor:pointer}
+.welcome{text-align:center;color:var(--sub);padding:40px 20px}
+.welcome .bl{font-size:3.5em;margin-bottom:12px}
+.welcome h2{color:var(--text);font-size:1.3em;margin-bottom:8px}
+.welcome h2 span{background:linear-gradient(90deg,var(--l),#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px}
+.chip{background:var(--glass);border:1px solid var(--border);color:var(--sub);padding:8px 14px;border-radius:20px;font-size:.8em;cursor:pointer}
+.input-area{display:flex;gap:8px;padding:12px 14px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bar);border-top:1px solid var(--border);align-items:center}
+#input{flex:1;padding:13px 16px;border-radius:14px;border:1px solid var(--border);background:var(--ibg);color:var(--text);font-size:.95em;outline:none;min-width:0}
+#input:focus{border-color:var(--p)}
+#input::placeholder{color:var(--sub)}
+.mb{width:50px;height:50px;border:1px solid var(--border);border-radius:14px;background:var(--glass);color:var(--text);font-size:1.15em;cursor:pointer;flex-shrink:0}
+.mb.rec{background:#ef4444;color:#fff;animation:pu 1s infinite}
+#send{width:50px;height:50px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--p),var(--b));color:#fff;font-size:1.15em;cursor:pointer;box-shadow:0 4px 15px rgba(97,92,237,.4);flex-shrink:0}
+#send:disabled{opacity:.5}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal.show{display:flex}
+.mbox{background:#1e1b4b;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px;width:100%;max-width:420px;color:#fff;max-height:85vh;overflow-y:auto}
+.mbox h3{margin-bottom:10px;background:linear-gradient(90deg,var(--l),#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.mbox label{display:block;font-size:.8em;color:#9ca3af;margin:13px 0 5px}
+.mbox input,.mbox select,.mbox textarea{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-size:.88em;outline:none}
+.mbox textarea{min-height:90px;resize:vertical;font-size:.78em}
+.trow{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:.88em}
+.info{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#86efac;font-size:.78em;padding:10px;border-radius:10px;margin-top:12px;line-height:1.5}
+.mbtns{display:flex;gap:10px;margin-top:18px}
+.mbtns button{flex:1;padding:12px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;font-size:.88em}
+.bs{background:linear-gradient(135deg,var(--p),var(--b));color:#fff}
+.bc{background:rgba(255,255,255,.1);color:#fff}
+.bd{background:rgba(239,68,68,.2);color:#fca5a5;width:100%;padding:11px;border-radius:12px;border:1px solid rgba(239,68,68,.3);cursor:pointer;margin-top:12px;font-size:.85em}
+</style>
+</head>
+<body class="dark">
+<div class="header">
+ <div class="logo">R</div>
+ <div class="htext"><h1>Ryu AI</h1><p><span class="st"></span><span id="sub">Otak Gratis Aktif • Tanpa Daftar</span></p></div>
+ <button class="hb" onclick="toggleTema()" id="temaBtn">🌙</button>
+ <button class="hb" onclick="bukaSetting()">⚙️</button>
+</div>
+<div id="messages"></div>
+<div class="input-area">
+ <button class="mb" id="micBtn" onclick="toggleMic()">🎤</button>
+ <input id="input" placeholder="Ketik atau bicara ke Ryu..." onkeydown="if(event.key==='Enter')kirim()">
+ <button id="send" onclick="kirim()">➤</button>
+</div>
+<div class="modal" id="modal"><div class="mbox">
+ <h3>⚙️ Pengaturan Ryu</h3>
+ <label>Mode Otak AI</label>
+ <select id="mode" onchange="ubahMode()">
+  <option value="gratis">🆓 GRATIS — langsung pakai, tanpa daftar</option>
+  <option value="api">🧠 Qwen3 — otak utama upgrade (OpenRouter/Groq)</option>
+  <option value="ollama">💻 Qwen3 Lokal — Ollama di PC (satu WiFi)</option>
+ </select>
+ <div id="settingGratis" class="info">✅ Mode ini sudah aktif! Ryu langsung bisa chat tanpa API key dan tanpa daftar akun. Kalau nanti mau otak Qwen3 yang lebih pintar, pilih mode di atas dan isi API key gratis dari openrouter.ai.</div>
+ <div id="settingApi" style="display:none">
+  <label>API Key (gratis: openrouter.ai → menu Keys)</label>
+  <input id="apiKey" type="password" placeholder="sk-or-...">
+  <label>Penyedia</label>
+  <select id="provider"><option value="openrouter">OpenRouter</option><option value="groq">Groq (cepat)</option></select>
+  <label>Model</label>
+  <input id="modelApi" value="qwen/qwen3-8b:free">
+ </div>
+ <div id="settingOllama" style="display:none">
+  <label>Alamat Ollama di PC</label>
+  <input id="ollamaUrl" placeholder="http://192.168.1.10:11434">
+  <label>Model</label>
+  <input id="modelOllama" value="qwen3:8b">
+ </div>
+ <div class="trow"><span>🔊 Ryu bicara otomatis (TTS)</span><input type="checkbox" id="ttsAuto" style="width:22px;height:22px"></div>
+ <label>Kepribadian Ryu (System Prompt)</label>
+ <textarea id="sysPrompt"></textarea>
+ <button class="bd" onclick="hapusRiwayat()">🗑️ Hapus Semua Riwayat Chat</button>
+ <div class="mbtns"><button class="bc" onclick="tutupSetting()">Batal</button><button class="bs" onclick="simpanSetting()">💾 Simpan</button></div>
+</div></div>
+<script>
+const VER='4.1';
+const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v!==null?v:d}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+// 🧹 AUTO-RESET: hapus SEMUA setelan/riwayat versi lama yang nyangkut, sekali jalan otomatis
+if(LS.get('ryu_ver','')!==VER){
+ ['ryu_riwayat','ryu_tema','ryu_mode','ryu_apikey','ryu_provider','ryu_modelapi','ryu_ollamaurl','ryu_modelollama','ryu_prompt','ryu_tts'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+ LS.set('ryu_ver',VER);
+}
+const PROMPT=`Kamu adalah Ryu AI 🐉, asisten AI pribadi yang cerdas, hangat, dan proaktif — bergaya seperti Qwen. Aturan:
+1. GAYA: Ramah, santai tapi profesional, bahasa Indonesia, emoji secukupnya. Panggil pengguna "Bos" sesekali.
+2. PRINSIP: SELALU fokus solusi. Jangan bilang "tidak bisa" mentah-mentah — tawarkan alternatif terbaik.
+3. KUALITAS: Jawaban terstruktur rapi, kejar hasil terbaik, maksimal 300 kata agar nyaman dibaca di HP.
+4. JUJUR: Tidak mengarang fakta.
+5. INISIATIF: Akhiri dengan saran langkah berikutnya.`;
+let riwayat=JSON.parse(LS.get('ryu_riwayat','[]'));
+function simpanRiwayat(){LS.set('ryu_riwayat',JSON.stringify(riwayat.slice(-40)))}
+let tema=LS.get('ryu_tema','dark');
+function terapkanTema(){document.body.className=tema;document.getElementById('temaBtn').textContent=tema==='dark'?'🌙':'☀️'}
+function toggleTema(){tema=tema==='dark'?'light':'dark';LS.set('ryu_tema',tema);terapkanTema()}
+terapkanTema();
+function ucapkan(t){try{if(!('speechSynthesis'in window))return false;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[*#_`>]/g,'').slice(0,800));u.lang='id-ID';speechSynthesis.speak(u);return true}catch(e){return false}}
+let rec=null,recOn=false;
+function toggleMic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('🎤 Input suara tidak tersedia di lingkungan ini. Coba buka lewat Chrome, atau ketik saja — Ryu tetap bisa! 😉');return}
+const mb=document.getElementById('micBtn');if(recOn){rec.stop();return}
+rec=new SR();rec.lang='id-ID';rec.interimResults=true;
+rec.onstart=()=>{recOn=true;mb.classList.add('rec')};
+rec.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;document.getElementById('input').value=t};
+rec.onend=()=>{recOn=false;mb.classList.remove('rec')};
+rec.onerror=()=>{recOn=false;mb.classList.remove('rec')};
+rec.start()}
+document.getElementById('sysPrompt').value=LS.get('ryu_prompt',PROMPT);
+[['mode','ryu_mode'],['apiKey','ryu_apikey'],['provider','ryu_provider'],['modelApi','ryu_modelapi'],['ollamaUrl','ryu_ollamaurl'],['modelOllama','ryu_modelollama']].forEach(([id,k])=>{const v=LS.get(k,null);if(v!==null)document.getElementById(id).value=v});
+document.getElementById('ttsAuto').checked=LS.get('ryu_tts','0')==='1';
+function ubahMode(){const m=document.getElementById('mode').value;
+document.getElementById('settingGratis').style.display=m==='gratis'?'block':'none';
+document.getElementById('settingApi').style.display=m==='api'?'block':'none';
+document.getElementById('settingOllama').style.display=m==='ollama'?'block':'none';
+const sub={gratis:'Otak Gratis Aktif • Tanpa Daftar',api:'Ditenagai Qwen3 • Otak Utama',ollama:'Qwen3 Lokal • Ollama'};
+document.getElementById('sub').textContent=sub[m]||sub.gratis}
+ubahMode();
+function bukaSetting(){document.getElementById('modal').classList.add('show')}
+function tutupSetting(){document.getElementById('modal').classList.remove('show')}
+function simpanSetting(){[['mode','ryu_mode'],['apiKey','ryu_apikey'],['provider','ryu_provider'],['modelApi','ryu_modelapi'],['ollamaUrl','ryu_ollamaurl'],['modelOllama','ryu_modelollama'],['sysPrompt','ryu_prompt']].forEach(([id,k])=>LS.set(k,document.getElementById(id).value));LS.set('ryu_tts',document.getElementById('ttsAuto').checked?'1':'0');ubahMode();tutupSetting();alert('✅ Pengaturan Ryu tersimpan!')}
+const messages=document.getElementById('messages'),input=document.getElementById('input'),btn=document.getElementById('send');
+function tampilWelcome(){messages.innerHTML=`<div class="welcome"><div class="bl">🐉</div><h2>Halo! Aku <span>Ryu</span></h2><p>Asisten AI-mu. Aku selalu fokus cari solusi,<br>bukan bilang "tidak bisa". Tanya apa saja!</p><div class="chips"><div class="chip" onclick="chipKlik('Jelaskan apa itu AI dengan sederhana')">💡 Apa itu AI?</div><div class="chip" onclick="chipKlik('Buatkan ide konten menarik untuk hari ini')">🎨 Ide konten</div><div class="chip" onclick="chipKlik('Bantu aku belajar coding dari nol')">💻 Belajar coding</div><div class="chip" onclick="chipKlik('Ceritakan sesuatu yang seru')">📖 Cerita seru</div></div></div>`}
+function tambahPesan(teks,tipe,ws){const w=document.querySelector('.welcome');if(w)w.remove();const d=document.createElement('div');d.className='msg '+tipe;d.textContent=teks;if(ws){d.appendChild(document.createElement('br'));const b=document.createElement('button');b.className='spk';b.textContent='🔊 Dengarkan';b.onclick=()=>{if(!ucapkan(teks))alert('🔊 Fitur suara belum tersedia di lingkungan ini. Buka lewat Chrome untuk suara ya!');};d.appendChild(b)}messages.appendChild(d);messages.scrollTop=messages.scrollHeight;return d}
+function chipKlik(t){input.value=t;kirim()}
+if(riwayat.length>0)riwayat.forEach(m=>tambahPesan(m.content,m.role==='user'?'user':'ai',m.role!=='user'));else tampilWelcome();
+async function panggilOtak(r){
+const mode=document.getElementById('mode').value;
+const sys=document.getElementById('sysPrompt').value;
+if(mode==='ollama'){const url=document.getElementById('ollamaUrl').value.trim();if(!url)throw new Error('Isi dulu alamat Ollama di ⚙️ Pengaturan');const res=await fetch(url+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:document.getElementById('modelOllama').value,messages:[{role:'system',content:sys},...r],stream:false})});const d=await res.json();return d.message.content}
+if(mode==='api'){const key=document.getElementById('apiKey').value.trim();if(!key)throw new Error('Isi dulu API Key di ⚙️ Pengaturan (gratis di openrouter.ai)');
+const prov=document.getElementById('provider').value;
+const url=prov==='groq'?'https://api.groq.com/openai/v1/chat/completions':'https://openrouter.ai/api/v1/chat/completions';
+const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:document.getElementById('modelApi').value,messages:[{role:'system',content:sys},...r]})});
+const d=await res.json();if(d.error)throw new Error(d.error.message);return d.choices[0].message.content}
+// MODE GRATIS (tanpa key): coba percakapan penuh, cadangan 1 babak
+try{
+const res=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'openai',messages:[{role:'system',content:sys},...r],private:true})});
+if(!res.ok)throw new Error('HTTP '+res.status);
+const d=await res.json();
+const t=d&&d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+if(t&&t.trim())return t.trim();
+throw new Error('kosong')}
+catch(e){
+const last=r[r.length-1].content;
+const res2=await fetch('https://text.pollinations.ai/'+encodeURIComponent(last)+'?system='+encodeURIComponent(sys));
+if(!res2.ok)throw new Error('Otak gratis sedang sibuk ('+res2.status+') — tunggu 10 detik lalu kirim ulang. Solusi permanen: pasang API key Qwen3 gratis di ⚙️');
+const t2=(await res2.text()).trim();
+if(!t2)throw new Error('Balikan kosong — coba kirim ulang');
+return t2}}
+function hapusRiwayat(){if(confirm('Yakin hapus semua riwayat chat?')){riwayat=[];LS.set('ryu_riwayat','[]');tampilWelcome()}}
+async function kirim(){const teks=input.value.trim();if(!teks)return;try{speechSynthesis&&speechSynthesis.cancel()}catch(e){}
+input.value='';btn.disabled=true;tambahPesan(teks,'user',false);riwayat.push({role:'user',content:teks});simpanRiwayat();
+const ind=tambahPesan('🐉 Ryu sedang berpikir...','ai',false);
+try{const j=await panggilOtak(riwayat);riwayat.push({role:'assistant',content:j});simpanRiwayat();ind.remove();tambahPesan(j,'ai',true);if(document.getElementById('ttsAuto').checked)ucapkan(j)}
+catch(e){ind.textContent='⚠️ '+e.message+'\n\n💡 Buka ⚙️ Pengaturan jika perlu bantuan koneksi.';riwayat.pop();simpanRiwayat()}
+btn.disabled=false;input.focus()}
+try{const mf={name:"Ryu AI - Asisten Pintar",short_name:"Ryu AI",start_url:".",display:"standalone",background_color:"#0f0c29",theme_color:"#615CED"};const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/json'}));document.head.appendChild(l)}catch(e){}
+</script>
+</body>
+</html>
